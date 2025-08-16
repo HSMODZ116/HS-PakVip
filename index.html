@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HS PakVip Predictor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- App -->
+  <script defer src="./script.js"></script>
+</head>
+<body>
+  <div class="wrapper">
+    <h2>PakVip Predictor</h2>
+
+    <div class="row">
+      <input id="numberInput" type="text" placeholder="Enter 3-digit number" maxlength="3" inputmode="numeric" />
+      <select id="timeFrame">
+        <option value="30">30 sec</option>
+        <option value="60">1 min</option>
+        <option value="180">3 min</option>
+        <option value="300">5 min</option>
+      </select>
+    </div>
+
+    <div class="btns">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn" class="ghost">Stop</button>
+      <button id="resetBtn" class="ghost">Reset</button>
+    </div>
+
+    <div class="timer" id="timerBox">⏳ Waiting...</div>
+
+    <div class="progress">
+      <div class="bar" id="progressBar"></div>
+    </div>
+
+    <div class="card">
+      <div class="result" id="resultBox">Result: ❓</div>
+      <div class="accuracy">Success Rate Today: <span id="accuracyPercent"></span></div>
+    </div>
+
+    <h3 class="subhead">History</h3>
+    <div class="history" id="historyBox"></div>
+
+    <footer>
+      🔗 <a href="https://t.me/haseeb117" target="_blank">Telegram</a> &nbsp;|&nbsp;
+      🌐 <a href="https://whatsapp.com/channel/0029VbB9XqR3mFYDMrbUJt2c" target="_blank">WhatsApp</a>
+    </footer>
+  </div>
+
+  <div class="help-btn" onclick="openChat()" title="Need Help?">❔</div>
+
+  <!-- Sounds (optional – put your files in the same folder or remove these) -->
+  <audio id="smallSound" src="small.mp3" preload="auto"></audio>
+  <audio id="bigSound"   src="big.mp3"   preload="auto"></audio>
+</body>
+</html>
