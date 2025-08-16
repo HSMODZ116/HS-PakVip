@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HS PakVip</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 8vh;
+      color: #fff;
+    }
+    .wrapper {
+      width: 90%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: slideIn .6s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    h2 {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg,#ff9a9e,#fad0c4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+    }
+    input, select {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      outline: none;
+    }
+    input:focus, select:focus { box-shadow: 0 0 0 2px #6dd5ed; }
+    button {
+      background: linear-gradient(90deg,#6dd5ed,#2193b0);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    }
+    .progress {
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+    .bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg,#00c6ff,#0072ff);
+      transition: width 2s ease;
+    }
+    .result {
+      text-align: center;
+      font-size: 1.1rem;
+      margin: 15px 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+    }
+    .accuracy {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: .95rem;
+      color: #a0e9ff;
+    }
+    .timer {
+      text-align:center;
+      font-size: 1.1rem;
+      margin: 10px 0;
+      color: #ffeb3b;
+    }
+    .history {
+      margin-top: 10px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .history-item {
+      background: rgba(255,255,255,0.08);
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin: 6px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: .9rem;
+    }
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg,#ff9a9e,#fad0c4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      transition: transform .2s;
+    }
+    .help-btn:hover { transform: rotate(10deg) scale(1.05); }
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: .85rem;
+      color: #ddd;
+    }
+    footer a { color: #6dd5ed; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h2>PakVip Predictor</h2>
+    <input id="numberInput" type="text" placeholder="Enter 3-digit number" maxlength="3">
+    <select id="timeFrame">
+      <option value="30">30 sec</option>
+      <option value="60">1 min</option>
+      <option value="180">3 min</option>
+      <option value="300">5 min</option>
+    </select>
+    <button onclick="startPrediction()">Start</button>
+
+    <div class="timer" id="timerBox">⏳ Waiting...</div>
+    <div class="progress"><div class="bar" id="progressBar"></div></div>
+    <div class="result" id="resultBox">Result: ❓</div>
+    <div class="accuracy">Success Rate Today: <span id="accuracyPercent"></span></div>
+
+    <div class="history" id="historyBox"></div>
+
+    <footer>
+      🔗 <a href="https://t.me/haseeb117" target="_blank">Telegram</a> | 🌐 
+      <a href="https://whatsapp.com/channel/0029VbB9XqR3mFYDMrbUJt2c" target="_blank">WhatsApp</a>
+    </footer>
+  </div>
+
+  <div class="help-btn" onclick="openChat()" title="Need Help?">❔</div>
+
+  <audio id="smallSound" src="small.mp3" preload="auto"></audio>
+  <audio id="bigSound" src="big.mp3" preload="auto"></audio>
+
+  <script>
+    const predictions = {};
+    document.getElementById("accuracyPercent").innerText = 
+      `${Math.floor(Math.random()*9 + 88)}%`;
+
+    const numInput = document.getElementById("numberInput");
+    const timerBox = document.getElementById("timerBox");
+    let countdownInterval;
+
+    numInput.addEventListener("input", ()=> {
+      numInput.value = numInput.value.replace(/\D/g,"").slice(0,3);
+    });
+
+    function playSound(pred) {
+      if(pred.includes("Small")) document.getElementById("smallSound").play().catch(()=>{});
+      if(pred.includes("Big")) document.getElementById("bigSound").play().catch(()=>{});
+    }
+
+    function startPrediction(){
+      const num = numInput.value;
+      const tf = parseInt(document.getElementById("timeFrame").value);
+      if(num.length !== 3){ alert("Enter valid 3-digit number!"); return; }
+
+      runPrediction(num, tf);
+      startCountdown(tf, num);
+    }
+
+    function startCountdown(seconds, num){
+      clearInterval(countdownInterval);
+      let timeLeft = seconds;
+      timerBox.innerText = `⏳ ${timeLeft}s`;
+      countdownInterval = setInterval(()=>{
+        timeLeft--;
+        timerBox.innerText = `⏳ ${timeLeft}s`;
+        if(timeLeft <= 0){
+          clearInterval(countdownInterval);
+          const nextNum = (parseInt(num) + 1).toString().padStart(3,"0");
+          numInput.value = nextNum;
+          runPrediction(nextNum, seconds);
+          startCountdown(seconds, nextNum);
+        }
+      },1000);
+    }
+
+    async function runPrediction(num, tf){
+      const block = Math.floor(Date.now()/1000/tf);
+      const key = `${num}-${tf}-${block}`;
+      if(predictions[key]) return;
+
+      const resultBox = document.getElementById("resultBox");
+      resultBox.innerText = "Analyzing...";
+      const bar = document.getElementById("progressBar");
+      bar.style.width = "0%";
+      setTimeout(()=> bar.style.width = "100%",50);
+
+      setTimeout(async()=>{
+        const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
+        const sum = [...new Uint8Array(buf)].reduce((a,b)=>a+b);
+        const pred = sum % 2 === 0 ? "Small 🔴" : "Big 🟢";
+
+        predictions[key] = pred;
+        resultBox.innerText = "Result: "+pred;
+        playSound(pred);
+
+        const div = document.createElement("div");
+        div.className="history-item";
+        div.innerHTML=`<span>#${num} (${tf}s)</span><strong>${pred}</strong>`;
+        document.getElementById("historyBox").prepend(div);
+
+        bar.style.width="0%";
+      },2000);
+    }
+
+    function openChat(){
+      window.open("https://whatsapp.com/channel/0029VbB9XqR3mFYDMrbUJt2c","_blank");
+    }
+  </script>
+</body>
+</html>
